@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1b2a57">
+<meta name="robots" content="noindex">
+<title>비서</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#fff,#0e1322);--ink:light-dark(#141a2e,#e9ecf5);--sub:light-dark(#69708a,#98a0bb);--line:light-dark(#e6e8f0,#242b42);--navy:light-dark(#1b2a57,#16204a);--soft:light-dark(#f4f5fa,#171d31);--red:#d8342c}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;overflow-x:clip}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:720px;margin:0 auto;padding:0 max(5vw,16px)}
+header{background:var(--navy);color:#fff;padding:26px 0 20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:30px;line-height:1.1;font-weight:700}
+.today{margin:6px 0 0;color:#c3cae4;font-size:14px}
+.gear{color:#c3cae4;min-width:44px;height:44px;border-radius:12px;font-size:14px;transition:background .25s}
+.gear:hover{background:#ffffff1a}
+.card{background:#fff;border-radius:16px;padding:10px;color:#141a2e;margin-top:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{padding:8px 14px;border-radius:999px;background:#f0f2f8;color:#69708a;font-size:14px;min-height:40px;transition:background .25s,color .25s}
+.chip.on{background:#1b2a57;color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.in{border:0;background:#f4f5fa;border-radius:10px;padding:11px 14px;min-height:46px;color:#141a2e}
+.grow{flex:1 1 180px}
+.go{background:var(--red);color:#fff;border-radius:10px;padding:0 20px;min-height:46px;font-weight:700;transition:opacity .2s}
+.go:active{opacity:.75}
+.lab{font-size:13px;color:#69708a;margin:8px 2px 4px;display:block}
+main{padding:20px 0 80px}
+.note{color:var(--sub);font-size:14px;margin:0 0 10px;min-height:21px}
+.ring{background:var(--red);color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;gap:12px;align-items:center;animation:pop .4s ease}
+.ring b{display:block;font-size:13px;font-weight:500;opacity:.85}
+.ring button{background:#fff;color:var(--red);border-radius:10px;padding:0 14px;min-height:40px;font-weight:700;flex:none}
+@keyframes pop{from{opacity:0;transform:translateY(-8px)}}
+h2{font-size:18px;margin:24px 0 6px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.ck{flex:none;width:44px;height:36px;display:grid;place-items:center}
+.ck i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--sub);transition:background .25s,border-color .25s}
+.done .ck i{background:var(--navy);border-color:var(--navy);box-shadow:inset 0 0 0 4px var(--bg)}
+.body{flex:1}
+.tx{display:block;padding:6px 4px;border-radius:8px;outline:0;overflow-wrap:anywhere;transition:background .25s}
+.tx:focus{background:var(--soft)}
+.done .tx{color:var(--sub);text-decoration:line-through}
+.at{display:inline-block;margin:0 4px 4px;font-size:13px;color:var(--red);white-space:nowrap}
+.done .at{color:var(--sub)}
+.sm{flex:none;height:36px;padding:0 8px;color:var(--sub);font-size:14px;border-radius:8px;white-space:nowrap;transition:background .25s,color .25s}
+.sm:hover{background:var(--soft)}
+.sm.ask{color:var(--red);font-weight:700}
+.empty{color:var(--sub);padding:12px 0;border-bottom:1px solid var(--line);margin:0}
+.btn{background:var(--soft);border-radius:10px;padding:0 16px;min-height:44px;font-weight:500;transition:opacity .2s}
+.btn:active{opacity:.7}
+.set{background:var(--soft);border-radius:16px;padding:16px;margin-bottom:16px;display:grid;gap:10px}
+.set p{margin:0;color:var(--sub);font-size:14px}
+#gate .in{width:100%;margin-bottom:8px}
+#gate p{font-size:14px;color:#69708a;margin:4px 2px 10px}
+.err{color:var(--red)!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top">
+    <div><h1>비서</h1><p class="today" id="today"></p></div>
+    <button class="gear" id="gear" hidden>설정</button>
+  </div>
+  <form class="card" id="gate" hidden>
+    <label class="lab" for="pw">비밀번호</label>
+    <input class="in" id="pw" type="password" autocomplete="current-password">
+    <div id="pw2box" hidden>
+      <label class="lab" for="pw2">비밀번호 한 번 더 (새 보관함을 만들어요)</label>
+      <input class="in" id="pw2" type="password" autocomplete="new-password">
+    </div>
+    <label class="lab" for="tk">연결 키 (github_pat_…)</label>
+    <input class="in" id="tk" type="password" autocomplete="off">
+    <p id="gmsg">이 기기에 한 번만 넣으면 돼요. 기록은 비밀번호로 잠겨서 저장돼요.</p>
+    <button class="go" type="submit" style="width:100%">열기</button>
+  </form>
+  <form class="card" id="f" hidden>
+    <div class="chips" id="chips"></div>
+    <div class="row">
+      <input class="in grow" id="t" type="text" autocomplete="off" aria-label="적을 내용">
+      <button class="go" type="submit">적기</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span id="dbox"><label class="lab" for="d">회의 날짜</label><input class="in" id="d" type="date"></span>
+      <span><label class="lab" for="a">알림 시간 (없으면 비워 두기)</label><input class="in" id="a" type="datetime-local"></span>
+    </div>
+  </form>
+</div></header>
+<main><div class="wrap">
+  <div id="rings"></div>
+  <div class="set" id="set" hidden>
+    <p id="nstate"></p>
+    <div class="row"><button class="btn" id="non">이 기기에서 알림 켜기</button><button class="btn" id="sync">지금 새로 받기</button><button class="btn" id="out">이 기기에서 로그아웃</button></div>
+    <p>알림은 이 화면(또는 PC 프로그램)이 열려 있을 때 울려요.</p>
+  </div>
+  <p class="note" id="note"></p>
+  <div id="out2"></div>
+</div></main>
+<script>
+{
+const OWNER='BoogieWany',REPO='wany-secretary',FILE='data.enc.json';
+const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const te=new TextEncoder(),td=new TextDecoder();
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode(...u.subarray(i,i+8192));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const ls={get:k=>{try{return localStorage.getItem(k)}catch{return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
+const KINDS=[['todo','기억할 일'],['meeting','회의 안건'],['idea','아이디어']];
+let pw='',token='',sha=null,salt=null,key=null,items=[],kind='todo',showDone=false,busy=false,dirty=false,isNew=false;
+
+async function mkKey(p,s){const k=await crypto.subtle.importKey('raw',te.encode(p),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:200000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(){const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify({items}))));
+  return JSON.stringify({v:1,salt:b64(salt),iv:b64(iv),ct:b64(ct)})}
+async function open(text){const j=JSON.parse(text);salt=unb64(j.salt);key=await mkKey(pw,salt);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(j.iv)},key,unb64(j.ct));return JSON.parse(td.decode(pt)).items||[]}
+const hdr=()=>({Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'});
+const merge=(a,b)=>{const m=new Map();for(const x of [...a,...b]){const o=m.get(x.id);if(!o||(x.u||0)>(o.u||0))m.set(x.id,x)}return [...m.values()]};
+
+async function pull(){
+  const r=await fetch(API+'?t='+Date.now(),{headers:hdr(),cache:'no-store'});
+  if(r.status===401||r.status===403)throw new Error('key');
+  if(r.status===404){isNew=true;return null}
+  if(!r.ok)throw new Error('net');
+  const j=await r.json();sha=j.sha;isNew=false;
+  let remote;try{remote=await open(atob(j.content.replace(/\s/g,'')))}catch{throw new Error('pw')}
+  return remote;
+}
+async function push(){
+  if(busy){dirty=true;return}
+  busy=true;note('저장하는 중…');
+  try{
+    for(let i=0;i<3;i++){
+      const body={message:'기록 저장',content:btoa(await seal())};if(sha)body.sha=sha;
+      const r=await fetch(API,{method:'PUT',headers:hdr(),body:JSON.stringify(body)});
+      if(r.ok){sha=(await r.json()).content.sha;isNew=false;note('');break}
+      if(r.status===409||r.status===422){const remote=await pull();if(remote)items=merge(remote,items);render();continue}
+      throw new Error(r.status===401||r.status===403?'key':'net');
+    }
+  }catch(e){note(e.message==='key'?'연결 키가 맞지 않거나 기한이 지났어요. 설정에서 로그아웃 후 다시 넣어 주세요.':'저장하지 못했어요. 인터넷을 확인해 주세요. 다시 열면 이 기기 내용으로 이어서 저장해요.')}
+  busy=false;if(dirty){dirty=false;push()}
+}
+async function refresh(quiet){
+  if(busy||document.activeElement?.isContentEditable)return;
+  try{const remote=await pull();if(remote){items=merge(remote,items);render()}if(!quiet)note('')}catch(e){if(!quiet)note('새로 받지 못했어요.')}
+}
+const note=s=>{$('#note').textContent=s};
+const change=()=>{ls.set('sec_cache',JSON.stringify(items));render();push()};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const nice=s=>{const d=new Date(s+'T00:00');return isNaN(d)?s:d.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})};
+const niceAt=s=>new Date(s).toLocaleString('ko-KR',{month:'numeric',day:'numeric',weekday:'short',hour:'numeric',minute:'2-digit'});
+const live=()=>items.filter(x=>!x.del);
+const by=(a,b)=>(a.c||0)-(b.c||0);
+
+function row(x){
+  return `<li class="${x.done?'done':''}" data-id="${esc(x.id)}"><button class="ck" data-act="done" aria-label="${x.done?'완료 취소':'완료'}"><i></i></button>
+  <span class="body"><span class="tx" contenteditable="plaintext-only" spellcheck="false">${esc(x.text)}</span>${x.at?`<span class="at">알림 ${esc(niceAt(x.at))}</span>`:''}</span>
+  <button class="sm" data-act="del">지우기</button></li>`}
+const list=(a,empty)=>a.length?`<ul>${a.map(row).join('')}</ul>`:`<p class="empty">${empty}</p>`;
+function render(){
+  if(document.activeElement?.isContentEditable)return;
+  $('#chips').innerHTML=KINDS.map(([k,l])=>`<button type="button" class="chip${k===kind?' on':''}" data-chip="${k}">${l}</button>`).join('');
+  $('#dbox').hidden=kind!=='meeting';
+  $('#t').placeholder=kind==='meeting'?'회의에서 얘기할 내용':kind==='todo'?'잊으면 안 되는 일':'떠오른 생각';
+  const all=live(),v=all.filter(x=>showDone||!x.done);
+  const m=v.filter(x=>x.kind==='meeting').sort((a,b)=>(a.date||'').localeCompare(b.date||'')||by(a,b));
+  const dates=[...new Set(m.map(x=>x.date||''))];
+  let h=dates.map(d=>`<h2>${esc(d?nice(d):'날짜 없음')} 회의</h2>`+list(m.filter(x=>(x.date||'')===d))).join('');
+  if(!dates.length)h=`<h2>회의 안건</h2><p class="empty">적어 둔 회의 안건이 없어요.</p>`;
+  h+=`<h2>기억할 일</h2>`+list(v.filter(x=>x.kind==='todo').sort(by),'기억할 일이 없어요.');
+  h+=`<h2>아이디어</h2>`+list(v.filter(x=>x.kind==='idea').sort(by),'적어 둔 아이디어가 없어요.');
+  const dn=all.filter(x=>x.done).length;
+  if(dn)h+=`<p style="margin-top:22px"><button class="btn" data-act="toggle">${showDone?'끝낸 것 숨기기':'끝낸 것 '+dn+'개 보기'}</button></p>`;
+  $('#out2').innerHTML=h;
+  const due=all.filter(x=>x.at&&x.rang&&!x.ack&&!x.done);
+  $('#rings').innerHTML=due.map(x=>`<div class="ring" data-id="${esc(x.id)}"><span><b>알림 · ${esc(niceAt(x.at))}</b>${esc(x.text)}</span><button data-ack>확인</button></div>`).join('');
+}
+function tick(){
+  const now=Date.now();let hit=false;
+  for(const x of live())if(x.at&&!x.rang&&!x.done&&new Date(x.at).getTime()<=now){
+    x.rang=true;x.u=now;hit=true;
+    try{if(window.Notification&&Notification.permission==='granted')new Notification('비서 알림',{body:x.text})}catch{}
+    try{navigator.vibrate?.([200,100,200])}catch{}
+  }
+  if(hit)change();
+}
+function nstate(){const p=window.Notification?Notification.permission:'none';
+  $('#nstate').textContent=p==='granted'?'이 기기 알림: 켜짐':p==='denied'?'이 기기 알림: 막혀 있음 (브라우저 설정에서 풀어야 해요)':p==='none'?'이 브라우저는 알림 창을 지원하지 않아요. 화면 위 빨간 띠로 알려 드려요.':'이 기기 알림: 꺼짐';
+  $('#non').hidden=p!=='default'}
+
+async function enter(){
+  $('#gmsg').className='';$('#gmsg').textContent='여는 중…';let need=true;
+  try{
+    const remote=await pull();
+    if(remote===null){
+      if($('#pw2box').hidden){$('#pw2box').hidden=false;$('#gmsg').textContent='아직 보관함이 없어요. 비밀번호를 한 번 더 넣으면 새로 만들어요.';return}
+      if($('#pw2').value!==pw){$('#gmsg').className='err';$('#gmsg').textContent='두 비밀번호가 달라요.';return}
+      salt=crypto.getRandomValues(new Uint8Array(16));key=await mkKey(pw,salt);items=[];
+    }else{let c=[];try{c=JSON.parse(ls.get('sec_cache')||'[]')}catch{}items=merge(remote,c);need=JSON.stringify(items)!==JSON.stringify(remote)}
+  }catch(e){
+    $('#gmsg').className='err';
+    $('#gmsg').textContent=e.message==='pw'?'비밀번호가 맞지 않아요.':e.message==='key'?'연결 키가 맞지 않거나 기한이 지났어요.':'연결하지 못했어요. 인터넷을 확인해 주세요.';
+    $('#gate').hidden=false;$('#f').hidden=true;return;
+  }
+  ls.set('sec_pw',pw);ls.set('sec_tk',token);
+  $('#gate').hidden=true;$('#f').hidden=false;$('#gear').hidden=false;
+  ls.set('sec_cache',JSON.stringify(items));render();if(need)push();
+  tick();setInterval(tick,20000);setInterval(()=>{if(!document.hidden)refresh(true)},60000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});
+}
+$('#gate').addEventListener('submit',e=>{e.preventDefault();pw=$('#pw').value;token=$('#tk').value.trim();if(pw&&token)enter()});
+$('#f').addEventListener('submit',e=>{
+  e.preventDefault();const text=$('#t').value.trim();if(!text)return;const now=Date.now();
+  const x={id:now.toString(36)+Math.random().toString(36).slice(2,6),kind,text,done:false,c:now,u:now};
+  if(kind==='meeting')x.date=$('#d').value||ymd(new Date());
+  if($('#a').value)x.at=$('#a').value;
+  items.push(x);$('#t').value='';$('#a').value='';change();
+});
+$('#chips').addEventListener('click',e=>{const c=e.target.closest('[data-chip]');if(c){kind=c.dataset.chip;render()}});
+$('#rings').addEventListener('click',e=>{if(!e.target.closest('[data-ack]'))return;const x=items.find(x=>x.id===e.target.closest('.ring').dataset.id);if(x){x.ack=true;x.u=Date.now();change()}});
+$('#out2').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act;
+  if(act==='toggle'){showDone=!showDone;return render()}
+  const x=items.find(x=>x.id===b.closest('li')?.dataset.id);if(!x)return;
+  if(act==='done'){x.done=!x.done;x.u=Date.now();change()}
+  else if(b.classList.contains('ask')){x.del=true;x.text='';x.u=Date.now();change()}
+  else{b.classList.add('ask');b.textContent='정말 지우기';setTimeout(()=>{if(b.isConnected){b.classList.remove('ask');b.textContent='지우기'}},3000)}
+});
+$('#out2').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
+$('#out2').addEventListener('focusout',e=>{
+  if(!e.target.isContentEditable)return;
+  const x=items.find(x=>x.id===e.target.closest('li')?.dataset.id),v=e.target.textContent.trim();
+  if(x&&v&&v!==x.text){x.text=v;x.u=Date.now();setTimeout(change,0)}else setTimeout(render,0);
+});
+$('#gear').addEventListener('click',()=>{$('#set').hidden=!$('#set').hidden;nstate()});
+$('#non').addEventListener('click',async()=>{try{await Notification.requestPermission()}catch{}nstate()});
+$('#sync').addEventListener('click',()=>{note('새로 받는 중…');refresh(false)});
+$('#out').addEventListener('click',e=>{const b=e.currentTarget;
+  if(b.dataset.ask){ls.del('sec_pw');ls.del('sec_tk');ls.del('sec_cache');location.reload()}
+  else{b.dataset.ask=1;b.textContent='정말 로그아웃 (이 기기의 비밀번호·키를 지워요)'}});
+$('#today').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+$('#d').value=ymd(new Date());
+pw=ls.get('sec_pw')||'';token=ls.get('sec_tk')||'';
+if(pw&&token){$('#pw').value=pw;$('#tk').value=token;enter()}else $('#gate').hidden=false;
+}
+</script>
+</body>
+</html>

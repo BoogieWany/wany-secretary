@@ -70,15 +70,9 @@ li{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px s
     <button class="gear" id="gear" hidden>설정</button>
   </div>
   <form class="card" id="gate" hidden>
-    <label class="lab" for="pw">비밀번호</label>
-    <input class="in" id="pw" type="password" autocomplete="current-password">
-    <div id="pw2box" hidden>
-      <label class="lab" for="pw2">비밀번호 한 번 더 (새 보관함을 만들어요)</label>
-      <input class="in" id="pw2" type="password" autocomplete="new-password">
-    </div>
     <label class="lab" for="tk">연결 키 (github_pat_…)</label>
     <input class="in" id="tk" type="password" autocomplete="off">
-    <p id="gmsg">이 기기에 한 번만 넣으면 돼요. 기록은 비밀번호로 잠겨서 저장돼요.</p>
+    <p id="gmsg">이 기기에 한 번만 넣으면 돼요.</p>
     <button class="go" type="submit" style="width:100%">열기</button>
   </form>
   <form class="card" id="f" hidden>
@@ -105,7 +99,7 @@ li{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px s
 </div></main>
 <script>
 {
-const OWNER='BoogieWany',REPO='wany-secretary',FILE='data.enc.json';
+const OWNER='BoogieWany',REPO='wany-secretary',FILE='data.json';
 const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -114,15 +108,10 @@ const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode(...
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const ls={get:k=>{try{return localStorage.getItem(k)}catch{return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
 const KINDS=[['todo','기억할 일'],['meeting','회의 안건'],['idea','아이디어']];
-let pw='',token='',sha=null,salt=null,key=null,items=[],kind='todo',showDone=false,busy=false,dirty=false,isNew=false;
+let token='',sha=null,items=[],kind='todo',showDone=false,busy=false,dirty=false,isNew=false;
 
-async function mkKey(p,s){const k=await crypto.subtle.importKey('raw',te.encode(p),'PBKDF2',false,['deriveKey']);
-  return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:200000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
-async function seal(){const iv=crypto.getRandomValues(new Uint8Array(12));
-  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify({items}))));
-  return JSON.stringify({v:1,salt:b64(salt),iv:b64(iv),ct:b64(ct)})}
-async function open(text){const j=JSON.parse(text);salt=unb64(j.salt);key=await mkKey(pw,salt);
-  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(j.iv)},key,unb64(j.ct));return JSON.parse(td.decode(pt)).items||[]}
+const seal=()=>b64(te.encode(JSON.stringify({items},null,1)));
+const open=c=>JSON.parse(td.decode(unb64(c))).items||[];
 const hdr=()=>({Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'});
 const merge=(a,b)=>{const m=new Map();for(const x of [...a,...b]){const o=m.get(x.id);if(!o||(x.u||0)>(o.u||0))m.set(x.id,x)}return [...m.values()]};
 
@@ -132,15 +121,14 @@ async function pull(){
   if(r.status===404){isNew=true;return null}
   if(!r.ok)throw new Error('net');
   const j=await r.json();sha=j.sha;isNew=false;
-  let remote;try{remote=await open(atob(j.content.replace(/\s/g,'')))}catch{throw new Error('pw')}
-  return remote;
+  return open(j.content.replace(/\s/g,''));
 }
 async function push(){
   if(busy){dirty=true;return}
   busy=true;note('저장하는 중…');
   try{
     for(let i=0;i<3;i++){
-      const body={message:'기록 저장',content:btoa(await seal())};if(sha)body.sha=sha;
+      const body={message:'기록 저장',content:seal()};if(sha)body.sha=sha;
       const r=await fetch(API,{method:'PUT',headers:hdr(),body:JSON.stringify(body)});
       if(r.ok){sha=(await r.json()).content.sha;isNew=false;note('');break}
       if(r.status===409||r.status===422){const remote=await pull();if(remote)items=merge(remote,items);render();continue}
@@ -201,23 +189,20 @@ async function enter(){
   $('#gmsg').className='';$('#gmsg').textContent='여는 중…';let need=true;
   try{
     const remote=await pull();
-    if(remote===null){
-      if($('#pw2box').hidden){$('#pw2box').hidden=false;$('#gmsg').textContent='아직 보관함이 없어요. 비밀번호를 한 번 더 넣으면 새로 만들어요.';return}
-      if($('#pw2').value!==pw){$('#gmsg').className='err';$('#gmsg').textContent='두 비밀번호가 달라요.';return}
-      salt=crypto.getRandomValues(new Uint8Array(16));key=await mkKey(pw,salt);items=[];
+    if(remote===null){items=[];
     }else{let c=[];try{c=JSON.parse(ls.get('sec_cache')||'[]')}catch{}items=merge(remote,c);need=JSON.stringify(items)!==JSON.stringify(remote)}
   }catch(e){
     $('#gmsg').className='err';
-    $('#gmsg').textContent=e.message==='pw'?'비밀번호가 맞지 않아요.':e.message==='key'?'연결 키가 맞지 않거나 기한이 지났어요.':'연결하지 못했어요. 인터넷을 확인해 주세요.';
+    $('#gmsg').textContent=e.message==='key'?'연결 키가 맞지 않거나 기한이 지났어요.':'연결하지 못했어요. 인터넷을 확인해 주세요.';
     $('#gate').hidden=false;$('#f').hidden=true;return;
   }
-  ls.set('sec_pw',pw);ls.set('sec_tk',token);
+  ls.set('sec_tk',token);
   $('#gate').hidden=true;$('#f').hidden=false;$('#gear').hidden=false;
   ls.set('sec_cache',JSON.stringify(items));render();if(need)push();
   tick();setInterval(tick,20000);setInterval(()=>{if(!document.hidden)refresh(true)},60000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true)});
 }
-$('#gate').addEventListener('submit',e=>{e.preventDefault();pw=$('#pw').value;token=$('#tk').value.trim();if(pw&&token)enter()});
+$('#gate').addEventListener('submit',e=>{e.preventDefault();token=$('#tk').value.trim();if(token)enter()});
 $('#f').addEventListener('submit',e=>{
   e.preventDefault();const text=$('#t').value.trim();if(!text)return;const now=Date.now();
   const x={id:now.toString(36)+Math.random().toString(36).slice(2,6),kind,text,done:false,c:now,u:now};
@@ -245,12 +230,12 @@ $('#gear').addEventListener('click',()=>{$('#set').hidden=!$('#set').hidden;nsta
 $('#non').addEventListener('click',async()=>{try{await Notification.requestPermission()}catch{}nstate()});
 $('#sync').addEventListener('click',()=>{note('새로 받는 중…');refresh(false)});
 $('#out').addEventListener('click',e=>{const b=e.currentTarget;
-  if(b.dataset.ask){ls.del('sec_pw');ls.del('sec_tk');ls.del('sec_cache');location.reload()}
-  else{b.dataset.ask=1;b.textContent='정말 로그아웃 (이 기기의 비밀번호·키를 지워요)'}});
+  if(b.dataset.ask){ls.del('sec_tk');ls.del('sec_cache');location.reload()}
+  else{b.dataset.ask=1;b.textContent='정말 로그아웃 (이 기기의 연결 키를 지워요)'}});
 $('#today').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 $('#d').value=ymd(new Date());
-pw=ls.get('sec_pw')||'';token=ls.get('sec_tk')||'';
-if(pw&&token){$('#pw').value=pw;$('#tk').value=token;enter()}else $('#gate').hidden=false;
+token=ls.get('sec_tk')||'';
+if(token){$('#tk').value=token;enter()}else $('#gate').hidden=false;
 }
 </script>
 </body>

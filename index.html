@@ -3,108 +3,121 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101216" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fff4e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1714" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
 <title>비서</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-:root{color-scheme:light dark;--bg:light-dark(#fff,#101216);--ink:light-dark(#15171c,#eceef2);--sub:light-dark(#6c7280,#9aa1ae);--line:light-dark(#ebecef,#23262d);--soft:light-dark(#f5f6f8,#191c22);--card:light-dark(#fff,#15181d);--red:light-dark(#d8342c,#f0625a);--on:light-dark(#15171c,#eceef2);--onink:light-dark(#fff,#101216)}
+/* 수첩 디자인 — 아이콘과 같은 따뜻한 종이 바탕 · 검정 잉크 · 코랄 한 점. 맨 위에서 비서가 오늘 상황을 말로 알려 줌 */
+:root{color-scheme:light dark;--bg:light-dark(#fff4e8,#1b1714);--ink:light-dark(#15171c,#f4ece2);--sub:light-dark(#8a7f73,#a39788);--line:light-dark(#f1e3d1,#2e2823);--rail:light-dark(#e9d9c6,#3a322b);--soft:light-dark(#f8e9d8,#2a241f);--card:light-dark(#fffaf3,#231e1a);--edge:light-dark(#ead9c4,#00000000);--red:light-dark(#ff5a4d,#ff6b5e);--on:light-dark(#15171c,#f4ece2);--onink:light-dark(#fff4e8,#1b1714)}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;overflow-x:clip}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 :focus-visible{outline:2px solid var(--red);outline-offset:2px}
 [hidden]{display:none!important}
-.wrap{max-width:680px;margin:0 auto;padding:0 max(5vw,18px)}
-header{padding:26px 0 0;position:sticky;top:0;background:var(--bg);z-index:5}
-.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-h1{margin:0;font-size:28px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
-.today{margin:4px 0 0;color:var(--sub);font-size:14px}
-.gear{color:var(--sub);padding:0 12px;height:40px;border-radius:10px;font-size:14px;transition:background .25s,color .25s}
+.wrap{max-width:640px;margin:0 auto;padding:0 max(5vw,22px)}
+header{padding:26px 0 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.logo{width:44px;height:44px;border-radius:12px;display:block}
+.gear{color:var(--sub);padding:0 12px;height:40px;border-radius:999px;font-size:14px;transition:background .25s,color .25s}
 .gear:hover,.gear[aria-expanded=true]{background:var(--soft);color:var(--ink)}
-nav{display:flex;gap:22px;margin-top:18px;border-bottom:1px solid var(--line)}
-nav a{position:relative;color:var(--sub);text-decoration:none;padding:10px 2px 12px;font-weight:600;transition:color .25s}
-nav a.on{color:var(--ink)}
-nav a::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);transform:scaleX(0);transition:transform .3s ease}
-nav a.on::after{transform:scaleX(1)}
-nav a i{font-style:normal;font-size:12px;font-weight:600;color:var(--red);margin-left:5px}
-main{padding:18px 0 96px}
+.say{font-size:clamp(22px,6.4vw,26px);line-height:1.35;font-weight:700;letter-spacing:-.02em;margin:22px 0 6px;text-wrap:balance;animation:fade .5s ease}
+.say em{font-style:normal;color:var(--red)}
+.today{margin:0;color:var(--sub);font-size:14px}
+nav{display:flex;gap:8px;margin-top:22px}
+nav a{color:var(--sub);text-decoration:none;padding:9px 18px;border-radius:999px;font-size:15px;font-weight:600;transition:background .3s,color .3s}
+nav a.on{background:var(--on);color:var(--onink)}
+nav a i{font-style:normal;margin-left:5px;opacity:.75}
+main{padding:14px 0 96px}
 .view{animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}}
 .note{color:var(--sub);font-size:13px;margin:0}
-.note:not(:empty){margin-bottom:10px}
-.view>h2:first-child,#sum>h2:first-child,#out2>h2:first-child{margin-top:8px}
-#f+#out2>h2:first-child{margin-top:22px}
-.box{background:var(--soft);border-radius:16px;padding:12px}
+.note:not(:empty){margin:4px 2px 8px}
+.box{background:var(--card);border-radius:18px;padding:14px;box-shadow:0 1px 0 var(--edge)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .chip{padding:7px 14px;border-radius:999px;color:var(--sub);font-size:14px;min-height:38px;transition:background .25s,color .25s}
-.chip.on{background:var(--on);color:var(--onink)}
+.chip.on{background:var(--soft);color:var(--ink);font-weight:600}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
-.in{border:1px solid transparent;background:var(--card);border-radius:10px;padding:10px 14px;min-height:46px;width:100%;transition:border-color .25s}
+.in{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 14px;min-height:46px;width:100%;transition:border-color .25s}
 .in:focus{outline:0;border-color:var(--sub)}
 .grow{flex:1 1 180px}
-.go{background:var(--on);color:var(--onink);border-radius:10px;padding:0 20px;min-height:46px;font-weight:600;transition:opacity .2s}
+.go{background:var(--on);color:var(--onink);border-radius:12px;padding:0 20px;min-height:46px;font-weight:600;transition:opacity .2s}
 .go:active{opacity:.7}
 .lab{font-size:12px;color:var(--sub);margin:10px 2px 4px;display:block}
 .fld{flex:1 1 150px}
-.ring{background:var(--red);color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:12px;display:flex;justify-content:space-between;gap:12px;align-items:center;animation:fade .4s ease}
+.ring{background:var(--red);color:#fff;border-radius:18px;padding:13px 16px;margin:8px 0 4px;display:flex;justify-content:space-between;gap:12px;align-items:center;animation:fade .4s ease}
 .ring b{display:block;font-size:12px;font-weight:500;opacity:.85}
-.ring button{background:#fff;color:#c22a23;border-radius:10px;padding:0 14px;min-height:38px;font-weight:600;flex:none}
-h2{font-size:13px;font-weight:600;color:var(--sub);margin:26px 0 4px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-h2 b{font-size:17px;color:var(--ink);font-weight:700}
-h2 span{font-weight:500}
+.ring button{background:#fff;color:#d63a2f;border-radius:999px;padding:0 16px;min-height:38px;font-weight:600;flex:none}
+h2{font-size:15px;font-weight:700;margin:28px 2px 10px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+h2 b{font-weight:700}
+h2 span{color:var(--sub);font-weight:500;font-size:13px}
 ul{list-style:none;margin:0;padding:0}
-li{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
-.ck{flex:none;width:40px;height:34px;display:grid;place-items:center;margin-left:-8px}
-.ck i{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--sub);transition:background .25s,border-color .25s,box-shadow .25s}
-.done .ck i{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 4px var(--bg)}
+.card{background:var(--card);border-radius:18px;padding:4px 16px;box-shadow:0 1px 0 var(--edge)}
+.card li{display:flex;align-items:flex-start;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.card li:last-child{border-bottom:0}
+.tl{position:relative;padding-left:28px}
+.tl::before{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:2px;background:var(--rail)}
+.tl li{position:relative;padding:8px 0}
+.tl li::before{content:"";position:absolute;left:-28px;top:13px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:2px solid var(--ink);transition:background .3s,border-color .3s,box-shadow .3s}
+.tl li.now::before{background:var(--red);border-color:var(--red);box-shadow:0 0 0 5px color-mix(in srgb,var(--red) 22%,transparent)}
+.tl li.past{opacity:.45}
+.tl .t{font-variant-numeric:tabular-nums;font-weight:700;margin-right:10px}
+.tl li.now .t{color:var(--red)}
+.tl b{font-size:17px}
+.tl small{display:block;color:var(--sub);font-size:13px}
+.tl .tag{margin-left:8px;vertical-align:2px}
+.ck{flex:none;width:40px;height:30px;display:grid;place-items:center;margin-left:-8px}
+.ck i{width:19px;height:19px;border-radius:50%;border:2px solid var(--ink);transition:background .25s,border-color .25s,box-shadow .25s}
+.done .ck i{background:var(--ink);box-shadow:inset 0 0 0 3px var(--card)}
 .body{flex:1}
-.tx{display:block;padding:5px 4px;border-radius:8px;outline:0;overflow-wrap:anywhere;transition:background .25s}
+.tx{display:block;padding:3px 4px;border-radius:8px;outline:0;overflow-wrap:anywhere;transition:background .25s}
 .tx:focus{background:var(--soft)}
 .done .tx{color:var(--sub);text-decoration:line-through}
-.at{display:inline-block;margin:0 4px 2px;font-size:12px;color:var(--red);white-space:nowrap}
+.at{display:inline-block;margin:0 4px;font-size:12px;color:var(--red);white-space:nowrap}
 .done .at{color:var(--sub)}
-.sm{flex:none;height:34px;padding:0 8px;color:var(--sub);font-size:13px;border-radius:8px;white-space:nowrap;opacity:.7;transition:background .25s,color .25s,opacity .25s}
+.sm{flex:none;height:30px;padding:0 8px;color:var(--sub);font-size:13px;border-radius:8px;white-space:nowrap;opacity:.7;transition:background .25s,color .25s,opacity .25s}
 .sm:hover{background:var(--soft);opacity:1}
 .sm.ask{color:var(--red);font-weight:600;opacity:1}
-.empty{color:var(--sub);padding:11px 0;border-bottom:1px solid var(--line);margin:0;font-size:15px}
-.btn{background:var(--soft);border-radius:10px;padding:0 16px;min-height:42px;font-weight:500;font-size:15px;transition:opacity .2s}
-.set .btn{background:var(--card)}
+.empty{color:var(--sub);margin:0;font-size:14px;padding:2px}
+.btn{background:var(--soft);border-radius:999px;padding:0 16px;min-height:42px;font-weight:500;font-size:14px;transition:opacity .2s}
 .btn:active{opacity:.7}
 .set{overflow:hidden;display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
 .set.open{grid-template-rows:1fr}
 .set>div{min-height:0}
-.set .box{margin-bottom:16px;display:grid;gap:10px}
+.set .box{margin:6px 0 10px;display:grid;gap:10px}
 .set p{margin:0;color:var(--sub);font-size:13px}
-.tm{flex:none;width:92px;padding-top:1px;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
-.tm small{display:block;font-weight:400;color:var(--sub);font-size:12px}
 .it{flex:1}
-.it b{font-weight:600}
+.it b{font-weight:700}
 .it small{display:block;color:var(--sub);font-size:13px;overflow-wrap:anywhere}
-.tag{flex:none;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap;margin-top:2px}
+.tm{flex:none;width:86px;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.tm small{display:block;font-weight:400;color:var(--sub);font-size:12px}
+.tag{flex:none;display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap}
 .tag.hot{background:var(--red);color:#fff}
 .tag.ink{background:var(--on);color:var(--onink)}
-.now{color:var(--red)}
-.past{opacity:.45}
+#gate,#tt{margin-top:12px}
 #gate p,#tt p{font-size:13px;color:var(--sub);margin:8px 2px 12px}
 .err{color:var(--red)!important}
-.foot{color:var(--sub);font-size:12px;margin-top:22px}
+.foot{color:var(--sub);font-size:12px;margin:22px 2px 0}
+#f{margin-top:8px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header><div class="wrap">
   <div class="top">
-    <div><h1>비서</h1><p class="today" id="today"></p></div>
+    <h1>비서</h1><img class="logo" src="icon.svg" alt="" width="44" height="44">
     <button class="gear" id="gear" aria-expanded="false" hidden>설정</button>
   </div>
+  <p class="say" id="say">비서</p><p class="today" id="today"></p>
   <nav id="nav" hidden>
     <a href="#today" data-v="today">오늘<i id="nToday"></i></a>
     <a href="#notes" data-v="notes">기록<i id="nNotes"></i></a>
@@ -252,16 +265,26 @@ async function ttLoad(code){
   }
   ttBusy=false;
 }
+function drawSay(){
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes(),left=live().filter(x=>!x.done).length;let L=[];
+  const same=S&&S.got&&ymd(new Date(S.got))===ymd(now);
+  if(S&&same){const cls=S.cls.filter(c=>!c.off),cur=cls.find(c=>nm>=c.s&&nm<c.e),nx=cls.find(c=>c.s>nm);
+    L.push(cls.length?`오늘 수업은 ${cls.length}개예요.`:'오늘은 수업이 없어요.');
+    if(cur)L.push(`<em>지금 ${esc(cur.name)}</em> 시간이고,`);else if(nx)L.push(`다음은 <em>${hm(nx.s)} ${esc(nx.name)}</em>이고,`);else if(cls.length)L.push('수업은 다 끝났고,');
+    L.push(S.cn.length?`상담 ${S.cn.length}건이 기다려요.`:S.tk.length?`업무 ${S.tk.length}개가 남았어요.`:left?`적어 둔 일이 ${left}개 있어요.`:'따로 챙길 건 없어요.');
+  }else if(token)L.push(left?`적어 둔 일이 <em>${left}개</em> 있어요.`:'적어 둔 일은 다 끝났어요.');
+  else L.push('부원장님 전용 비서예요.');
+  const h=L.join('<br>');if($('#say').innerHTML!==h)$('#say').innerHTML=h}
 const mdd=s=>s?(+s.slice(5,7))+'/'+(+s.slice(8,10)):'';
 const dTag=dd=>dd===0?'<span class="tag hot">오늘</span>':dd<0?'':`<span class="tag${dd<=7?' ink':''}">D-${dd}</span>`;
-const sec=(title,n,body,empty)=>`<h2><b>${title}</b><span>${n?n+'개':''}</span></h2>`+(n?`<ul>${body}</ul>`:`<p class="empty">${empty}</p>`);
+const sec=(title,n,body,empty,cls)=>`<h2><b>${title}</b><span>${n?n+'개':''}</span></h2>`+(n?`<ul class="${cls||'card'}">${body}</ul>`:`<p class="empty">${empty}</p>`);
 function drawToday(){
-  if(!S){$('#sum').innerHTML='';$('#nToday').textContent='';return}
+  drawSay();if(!S){$('#sum').innerHTML='';$('#nToday').textContent='';return}
   const now=new Date(),nm=now.getHours()*60+now.getMinutes(),tdS=ymd(now);
   const same=!!S.got&&ymd(new Date(S.got))===tdS;
   let h='';
   h+=sec('오늘 수업',same?S.cls.length:0,S.cls.map(c=>{const live=!c.off&&nm>=c.s&&nm<c.e,past=nm>=c.e;
-    return `<li class="${c.off||past?'past':''}"><span class="tm${live?' now':''}">${hm(c.s)}<small>~ ${hm(c.e)}</small></span><span class="it"><b>${esc(c.name)}</b><small>${esc(c.per)}${c.n?' · '+c.n+'명':''}</small></span>${live?'<span class="tag hot">지금</span>':c.tag?`<span class="tag">${esc(c.tag)}</span>`:''}</li>`}).join(''),same?'오늘은 수업이 없어요.':'오늘 수업을 아직 받지 못했어요.');
+    return `<li class="${live?'now':''}${c.off||past?' past':''}"><span class="t">${hm(c.s)}</span><b>${esc(c.name)}</b>${c.tag?`<span class="tag">${esc(c.tag)}</span>`:''}<small>${esc([c.per,c.n?c.n+'명':'',hm(c.e)+'까지'].filter(Boolean).join(' · '))}</small></li>`}).join(''),same?'오늘은 수업이 없어요.':'오늘 수업을 아직 받지 못했어요.','tl');
   h+=sec('내 업무',S.tk.length,S.tk.map(t=>`<li><span class="it"><b>${esc(t.t)}</b><small>${esc([t.k,[t.s,t.g].filter(Boolean).join(' '),t.j,t.n?t.n+'강':'',t.d?'기한 '+mdd(t.d):''].filter(Boolean).join(' · '))}${t.m?'<br>'+esc(t.m):''}</small></span>${t.d?dTag(ddOf(tdS,t.d))||'<span class="tag hot">기한 지남</span>':''}</li>`).join(''),'안 끝난 업무가 없어요.');
   const ex=S.ex.filter(x=>x.to>=tdS);
   const exV=exAll?ex:ex.slice(0,5);
@@ -317,7 +340,7 @@ function row(x){
   return `<li class="${x.done?'done':''}" data-id="${esc(x.id)}"><button class="ck" data-act="done" aria-label="${x.done?'완료 취소':'완료'}"><i></i></button>
   <span class="body"><span class="tx" contenteditable="plaintext-only" spellcheck="false">${esc(x.text)}</span>${x.at?`<span class="at">알림 ${esc(niceAt(x.at))}</span>`:''}</span>
   <button class="sm" data-act="del">지우기</button></li>`}
-const list=(a,empty)=>a.length?`<ul>${a.map(row).join('')}</ul>`:`<p class="empty">${empty}</p>`;
+const list=(a,empty)=>a.length?`<ul class="card">${a.map(row).join('')}</ul>`:`<p class="empty">${empty}</p>`;
 function render(){
   if(document.activeElement?.isContentEditable)return;
   document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===view));
@@ -337,6 +360,7 @@ function render(){
   $('#out2').innerHTML=h;
   $('#nNotes').textContent=String(all.filter(x=>!x.done).length||'');
   const due=all.filter(x=>x.at&&x.rang&&!x.ack&&!x.done);
+  drawSay();
   $('#rings').innerHTML=due.map(x=>`<div class="ring" data-id="${esc(x.id)}"><span><b>알림 · ${esc(niceAt(x.at))}</b>${esc(x.text)}</span><button data-ack>확인</button></div>`).join('');
 }
 function notify(text){
@@ -408,7 +432,7 @@ addEventListener('hashchange',route);
 $('#today').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 $('#d').value=ymd(new Date());
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(r=>{swReg=r}).catch(()=>{});
-route();
+route();drawSay();
 token=ls.get('sec_tk')||'';
 if(token){$('#tk').value=token;enter()}else $('#gate').hidden=false;
 }
